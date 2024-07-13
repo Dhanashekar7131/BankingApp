@@ -14,6 +14,10 @@ provider "aws" {
 # VPC
 resource "aws_vpc" "proj-vpc" {
   cidr_block = "20.0.0.0/16"
+
+  tags = {
+    Name = "proj-vpc"
+  }
 }
 
 # Internet Gateway
@@ -21,7 +25,7 @@ resource "aws_internet_gateway" "proj-ig" {
   vpc_id = aws_vpc.proj-vpc.id
 
   tags = {
-    Name = "gateway1"
+    Name = "proj-ig"
   }
 }
 
@@ -32,7 +36,7 @@ resource "aws_subnet" "proj-subnet" {
   availability_zone = "us-east-1a"
 
   tags = {
-    Name = "subnet1"
+    Name = "proj-subnet"
   }
 }
 
@@ -46,7 +50,7 @@ resource "aws_route_table" "proj-rt" {
   }
 
   tags = {
-    Name = "rt1"
+    Name = "proj-rt"
   }
 }
 
@@ -102,21 +106,27 @@ resource "aws_security_group" "proj-sg" {
   }
 
   tags = {
-    Name = "proj-sg1"
+    Name = "proj-sg"
+  }
+}
+
+# Network Interface
+resource "aws_network_interface" "proj-ni" {
+  subnet_id       = aws_subnet.proj-subnet.id
+  private_ips     = ["20.0.1.10"]
+  security_groups = [aws_security_group.proj-sg.id]
+
+  tags = {
+    Name = "proj-ni"
   }
 }
 
 # EC2 Instance
 resource "aws_instance" "Deployment_server" {
-  ami           = "ami-04a81a99f5ec58529"  # Replace with your AMI ID
+  ami           = "ami-0a0e5d9c7acc336f1"  # Replace with your AMI ID
   instance_type = "t2.micro"
   key_name      = "keypair"                # Replace with your key pair name
   subnet_id     = aws_subnet.proj-subnet.id
-
-  network_interface {
-    network_interface_id = aws_network_interface.proj-ni.id
-    device_index         = 0
-  }
 
   tags = {
     Name = "Deployment_Server"
@@ -129,15 +139,8 @@ resource "aws_eip" "proj-eip" {
   instance          = aws_instance.Deployment_server.id
   network_interface = aws_network_interface.proj-ni.id
   associate_with_private_ip = "20.0.1.10"
-}
-
-# Network Interface
-resource "aws_network_interface" "proj-ni" {
-  subnet_id       = aws_subnet.proj-subnet.id
-  private_ips     = ["20.0.1.10"]
-  security_groups = [aws_security_group.proj-sg.id]
 
   tags = {
-    Name = "proj_network_interface"
+    Name = "proj-eip"
   }
 }
