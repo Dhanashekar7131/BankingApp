@@ -13,7 +13,7 @@ provider "aws" {
 
 # VPC
 resource "aws_vpc" "proj-vpc" {
-  cidr_block = "20.0.0.0/16"
+  cidr_block = "10.0.0.0/16"
 
   tags = {
     Name = "proj-vpc"
@@ -32,7 +32,7 @@ resource "aws_internet_gateway" "proj-ig" {
 # Subnet
 resource "aws_subnet" "proj-subnet" {
   vpc_id            = aws_vpc.proj-vpc.id
-  cidr_block        = "20.0.1.0/24"
+  cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-1a"
 
   tags = {
@@ -64,8 +64,9 @@ resource "aws_route_table_association" "proj-rt-sub-assoc" {
 resource "aws_security_group" "proj-sg" {
   vpc_id = aws_vpc.proj-vpc.id
 
+  # Ingress rules
   ingress {
-    description = "Allow SSH traffic from anywhere"
+    description = "Allow SSH traffic"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
@@ -73,7 +74,7 @@ resource "aws_security_group" "proj-sg" {
   }
 
   ingress {
-    description = "Allow HTTP traffic from anywhere"
+    description = "Allow HTTP traffic"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -81,7 +82,7 @@ resource "aws_security_group" "proj-sg" {
   }
 
   ingress {
-    description = "Allow HTTPS traffic from anywhere"
+    description = "Allow HTTPS traffic"
     from_port   = 443
     to_port     = 443
     protocol    = "tcp"
@@ -96,8 +97,9 @@ resource "aws_security_group" "proj-sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Egress rule
   egress {
-    description      = "Allow all outbound traffic to anywhere"
+    description      = "Allow all outbound traffic"
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
@@ -107,17 +109,6 @@ resource "aws_security_group" "proj-sg" {
 
   tags = {
     Name = "proj-sg"
-  }
-}
-
-# Network Interface
-resource "aws_network_interface" "proj-ni" {
-  subnet_id       = aws_subnet.proj-subnet.id
-  private_ips     = ["20.0.1.10"]
-  security_groups = [aws_security_group.proj-sg.id]
-
-  tags = {
-    Name = "proj-ni"
   }
 }
 
@@ -138,7 +129,6 @@ resource "aws_eip" "proj-eip" {
   vpc               = true
   instance          = aws_instance.Deployment_server.id
   network_interface = aws_network_interface.proj-ni.id
-  associate_with_private_ip = "20.0.1.10"
 
   tags = {
     Name = "proj-eip"
