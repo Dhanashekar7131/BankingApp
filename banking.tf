@@ -108,7 +108,7 @@ resource "aws_eip" "main" {
 resource "aws_instance" "prod_test_server" {
   ami             = "ami-0a313d6098716f372" # Ubuntu 22.04 AMI ID for us-east-1
   instance_type   = "t2.micro"
-  key_name        = "your-key-name" # Replace with your key pair name
+  key_name        = "keypair" # Replace with your key pair name
 
   network_interface {
     network_interface_id = aws_network_interface.main.id
