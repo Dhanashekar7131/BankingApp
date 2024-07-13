@@ -131,8 +131,8 @@ resource "aws_eip" "proj-eip" {
 }
 
 # EC2 Instance
-resource "aws_instance" "prod_New_test_server" {
-  ami           = "ami-0a313d6098716f372"  # Replace with your AMI ID
+resource "aws_instance" "prod_test_server" {
+  ami           = "ami-04a81a99f5ec58529"  # Replace with your AMI ID
   instance_type = "t2.micro"
   key_name      = "keypair"                # Replace with your key pair name
 
@@ -142,6 +142,6 @@ resource "aws_instance" "prod_New_test_server" {
   }
 
   tags = {
-    Name = "Prod_New_test_server"
+    Name = "Prod_test_server"
   }
 }
