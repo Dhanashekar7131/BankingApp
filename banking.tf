@@ -13,7 +13,7 @@ provider "aws" {
 
 # VPC
 resource "aws_vpc" "proj-vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "20.0.0.0/16"
 }
 
 # Internet Gateway
@@ -28,7 +28,7 @@ resource "aws_internet_gateway" "proj-ig" {
 # Subnet
 resource "aws_subnet" "proj-subnet" {
   vpc_id            = aws_vpc.proj-vpc.id
-  cidr_block        = "10.0.1.0/24"
+  cidr_block        = "20.0.1.0/24"
   availability_zone = "us-east-1a"
 
   tags = {
@@ -43,11 +43,6 @@ resource "aws_route_table" "proj-rt" {
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.proj-ig.id
-  }
-
-  route {
-    ipv6_cidr_block = "::/0"
-    gateway_id      = aws_internet_gateway.proj-ig.id
   }
 
   tags = {
@@ -90,11 +85,11 @@ resource "aws_security_group" "proj-sg" {
   }
 
   ingress {
-    description = "Allow all inbound traffic within the security group"
+    description = "Allow all inbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    self        = true
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -111,30 +106,12 @@ resource "aws_security_group" "proj-sg" {
   }
 }
 
-# Network Interface
-resource "aws_network_interface" "proj-ni" {
-  subnet_id       = aws_subnet.proj-subnet.id
-  private_ips     = ["10.0.1.10"]
-  security_groups = [aws_security_group.proj-sg.id]
-
-  tags = {
-    Name = "proj_network_interface"
-  }
-}
-
-# Elastic IP
-resource "aws_eip" "proj-eip" {
-  vpc = true
-
-  # Attach the EIP to the network interface
-  network_interface = aws_network_interface.proj-ni.id
-}
-
 # EC2 Instance
-resource "aws_instance" "prod_test_server" {
+resource "aws_instance" "Deployment_server" {
   ami           = "ami-04a81a99f5ec58529"  # Replace with your AMI ID
   instance_type = "t2.micro"
   key_name      = "keypair"                # Replace with your key pair name
+  subnet_id     = aws_subnet.proj-subnet.id
 
   network_interface {
     network_interface_id = aws_network_interface.proj-ni.id
@@ -142,6 +119,25 @@ resource "aws_instance" "prod_test_server" {
   }
 
   tags = {
-    Name = "Prod_test_server"
+    Name = "Deployment_Server"
+  }
+}
+
+# Elastic IP
+resource "aws_eip" "proj-eip" {
+  vpc               = true
+  instance          = aws_instance.prod_test_server.id
+  network_interface = aws_network_interface.proj-ni.id
+  associate_with_private_ip = "20.0.1.10"
+}
+
+# Network Interface
+resource "aws_network_interface" "proj-ni" {
+  subnet_id       = aws_subnet.proj-subnet.id
+  private_ips     = ["20.0.1.10"]
+  security_groups = [aws_security_group.proj-sg.id]
+
+  tags = {
+    Name = "proj_network_interface"
   }
 }
