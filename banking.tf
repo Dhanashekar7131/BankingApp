@@ -126,7 +126,7 @@ resource "aws_instance" "Deployment_server" {
 # Elastic IP
 resource "aws_eip" "proj-eip" {
   vpc               = true
-  instance          = aws_instance.prod_test_server.id
+  instance          = aws_instance.Deployment_server.id
   network_interface = aws_network_interface.proj-ni.id
   associate_with_private_ip = "20.0.1.10"
 }
