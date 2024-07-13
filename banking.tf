@@ -128,7 +128,6 @@ resource "aws_eip" "proj-eip" {
 
   # Attach the EIP to the network interface
   network_interface = aws_network_interface.proj-ni.id
-  associate_with_private_ip = "10.0.1.10"
 }
 
 # EC2 Instance
