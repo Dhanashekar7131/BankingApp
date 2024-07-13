@@ -111,7 +111,16 @@ resource "aws_security_group" "proj-sg" {
     Name = "proj-sg"
   }
 }
+# Network Interface
+resource "aws_network_interface" "proj-ni" {
+  subnet_id       = aws_subnet.proj-subnet.id
+  private_ips     = ["10.0.1.10"]
+  security_groups = [aws_security_group.proj-sg.id]
 
+  tags = {
+    Name = "proj-ni"
+  }
+}
 # EC2 Instance
 resource "aws_instance" "Deployment_server" {
   ami           = "ami-0a0e5d9c7acc336f1"  # Replace with your AMI ID
